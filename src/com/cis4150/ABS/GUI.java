@@ -1,10 +1,11 @@
+package com.cis4150.ABS;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
-public class AbsGui extends JFrame {
+public class GUI extends JFrame {
 
-    public AbsGui() {
+    public GUI() {
 
         initUI();
     }
@@ -20,7 +21,7 @@ public class AbsGui extends JFrame {
     public static void main(String[] args) {
 
         EventQueue.invokeLater(() -> {
-            AbsGui ex = new AbsGui();
+            GUI ex = new GUI();
             ex.setVisible(true);
         });
     }
