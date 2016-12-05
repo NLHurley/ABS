@@ -1,28 +1,21 @@
-package vtc.edu;
-
-//This code was taken and modified from http://www.codejava.net/coding/file-encryption-and-decryption-simple-example
-//This code was taken and modified from http://www.codejava.net/coding/file-encryption-and-decryption-simple-example
+package com.cis4150.ABS
 //This code was taken and modified from http://www.codejava.net/coding/file-encryption-and-decryption-simple-example
 
+
+import org.apache.commons.io.FileUtils;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * Encryption Class to encrypt and decrypt files being backed up
