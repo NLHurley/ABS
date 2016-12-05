@@ -1,4 +1,4 @@
-package com.cis4150.ABS
+package com.cis4150.ABS;
 //This code was taken and modified from http://www.codejava.net/coding/file-encryption-and-decryption-simple-example
 
 

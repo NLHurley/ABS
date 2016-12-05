@@ -1,10 +1,18 @@
 package com.cis4150.ABS;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,14 +26,14 @@ public class GUI extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JTextField outputFolder, customFiles;
-    JProgressBar progressBar;
     static GUI frame;
+    static RestoreGUI restoreFrame = new RestoreGUI();
     JComboBox<String> backupChoiceBox = new JComboBox<>();
-    JButton fullButton, restoreButton, customButton, chooseFolder, customFolder;
+    JButton fullButton, restoreButton, customButton, chooseFolder, customFolderChooser;
     static JButton cancelButton;
-    static JLabel progressLabel;
     static JLabel header;
     static JLabel logo;
+    JRadioButton encryptOnButton = new JRadioButton("Select if you would like your data encrypted.");
 
     Image icon, background;
     static final Color RED = new Color(255, 65, 65);
@@ -41,7 +49,7 @@ public class GUI extends JFrame {
         UIManager.put("ComboBox.selectionForeground", Color.LIGHT_GRAY);
         UIManager.put("ComboBox.disabledForeground", Color.DARK_GRAY);
         UIManager.put("ComboBox.disabledBackground", Color.LIGHT_GRAY);
-        UIManager.put("ProgressBar.selectionBackground", Color.LIGHT_GRAY);
+
 
         // Start up the GUI and make it visible.
         try {
@@ -103,6 +111,11 @@ public class GUI extends JFrame {
         lblChooseADrive.setBounds(34, 50, 256, 21);
         contentPane.add(lblChooseADrive);
 
+
+        for (Path p : FileSystems.getDefault().getRootDirectories()) {
+            System.out.print(p);
+        }
+
         // pick a drive
         File[] backupChoiceDrive = File.listRoots();
         String[] backupChoices = new String[backupChoiceDrive.length];
@@ -148,15 +161,15 @@ public class GUI extends JFrame {
         customFiles.setColumns(10);
 
         // Choose your files to backup
-        customFolder = new JButton("Choose folder");
-        customFolder.setFocusable(false);
-        customFolder.setBackground(Color.LIGHT_GRAY);
-        customFolder.setBorder(new LineBorder(new Color(0, 0, 0)));
-        customFolder.setForeground(Color.DARK_GRAY);
-        customFolder.setFont(new Font("Arial", Font.PLAIN, 10));
-        customFolder.setBounds(258, 125, 100, 23);
+        customFolderChooser = new JButton("Choose folder");
+        customFolderChooser.setFocusable(false);
+        customFolderChooser.setBackground(Color.LIGHT_GRAY);
+        customFolderChooser.setBorder(new LineBorder(new Color(0, 0, 0)));
+        customFolderChooser.setForeground(Color.DARK_GRAY);
+        customFolderChooser.setFont(new Font("Arial", Font.PLAIN, 10));
+        customFolderChooser.setBounds(258, 125, 100, 23);
         // When the user hits this button, create a file chooser.
-        customFolder.addActionListener(e -> {
+        customFolderChooser.addActionListener(e -> {
             // Set the UI of the file chooser to the system default
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -180,7 +193,7 @@ public class GUI extends JFrame {
                 ex.printStackTrace();
             }
         });
-        contentPane.add(customFolder);
+        contentPane.add(customFolderChooser);
 
         // Destination label
         JLabel lblWhereDoYou = new JLabel("Where do you want to backup your data?");
@@ -234,6 +247,14 @@ public class GUI extends JFrame {
         });
         contentPane.add(chooseFolder);
 
+
+        // Add the choices to the box
+        for (String str : backupChoices) {
+            backupChoiceBox.addItem(str);
+        }
+        backupChoiceBox.setBounds(34, 68, 324, 21);
+        contentPane.add(backupChoiceBox);
+
         // The button that will start a custom backup.
         customButton = new JButton("Custom");
         customButton.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -244,10 +265,29 @@ public class GUI extends JFrame {
         customButton.setFocusable(false);
         customButton.addActionListener(e -> {
             if (!outputFolder.getText().isEmpty()) {
-                new Settings();
+                try {
+                    startCustomBackup();
+                } catch (IllegalBlockSizeException e1) {
+                    e1.printStackTrace();
+                } catch (NoSuchPaddingException e1) {
+                    e1.printStackTrace();
+                } catch (BadPaddingException e1) {
+                    e1.printStackTrace();
+                } catch (NoSuchAlgorithmException e1) {
+                    e1.printStackTrace();
+                } catch (InvalidKeyException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         contentPane.add(customButton);
+
+        // Radio button for encrypting the files when backing up.
+        encryptOnButton.setSelected(false);
+        encryptOnButton.setBounds(30, 200, 500, 23);
+
+        contentPane.add(encryptOnButton);
+
 
         // The button that will start a full backup.
         fullButton = new JButton("Full");
@@ -273,9 +313,7 @@ public class GUI extends JFrame {
         restoreButton.setBounds(258, 225, 100, 30);
         restoreButton.setFocusable(false);
         restoreButton.addActionListener(e -> {
-            if (!outputFolder.getText().isEmpty()) {
-                restoreBackup();
-            }
+            restoreFrame.setVisible(true);
         });
         contentPane.add(restoreButton);
 
@@ -309,8 +347,6 @@ public class GUI extends JFrame {
         customButton.setEnabled(false);
         cancelButton.setBackground(RED);
         chooseFolder.setEnabled(false);
-        progressLabel.setVisible(true);
-        progressBar.setVisible(true);
         setBounds(100, 100, 400, 335);
         setLocationRelativeTo(null);
     }
@@ -330,11 +366,27 @@ public class GUI extends JFrame {
     }
 
     // This function starts a custom backup.
-    public void startCustomBackup() {
-        String choice = backupChoiceBox.getSelectedItem().toString();
+    public void startCustomBackup() throws IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String choice = customFiles.getText().toString();
         fixButtons();
-        header.setText("Performing custom backup...");
-//      run custom backup
+        Backup backup = new Backup();
+        File file1 = new File(choice);
+        File file2 = new File(outputFolder.getText());
+        File encryptedFile = new File(choice + ".enc");
+        try {
+            if (encryptOnButton.isSelected()) {
+                Encrypt.encryptFile("1234567890123456", file1, encryptedFile);
+
+                backup.copyFileForBackUp(encryptedFile, file2);
+                header.setText("Success!");
+            } else {
+                backup.copyFileForBackUp(encryptedFile, file2);
+                header.setText("Success!");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // This function starts a full backup.
@@ -346,12 +398,5 @@ public class GUI extends JFrame {
 
     }
 
-    // This function starts a custom backup.
-    public void restoreBackup() {
-        String choice = backupChoiceBox.getSelectedItem().toString();
-        fixButtons();
-        header.setText("Performing restore...");
-        // run restore
-    }
 
 }

@@ -1,9 +1,9 @@
-package vtc.edu;
+package com.cis4150.ABS;
+
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * Backup class for Advanced Backing Strategies
@@ -22,7 +22,7 @@ public class Backup
 		
 		if (checkIfBackUpWorked(source, dest) == true)
 		{
-			System.out.println("The file was succesfully backed up");
+			System.out.println("The file was successfully backed up");
 		}
 		else
 			System.out.println("The file was not backed up");
@@ -36,7 +36,7 @@ public class Backup
 	 */
 	public static void copyFileForBackUp (File source, File dest) throws IOException
 	{
-		 FileUtils.copyFile(source, dest);
+		 FileUtils.copyFileToDirectory(source, dest);
 	}
 	
 	/**
