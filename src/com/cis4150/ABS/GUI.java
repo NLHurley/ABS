@@ -9,8 +9,6 @@ import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
@@ -67,7 +65,6 @@ public class GUI extends JFrame {
         icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource("ABSLogo.png"));
         setIconImage(icon);
 
-        // Boring stuff
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(300, 300, 500, 300);
         setLocationRelativeTo(null);
@@ -111,10 +108,6 @@ public class GUI extends JFrame {
         lblChooseADrive.setBounds(34, 50, 256, 21);
         contentPane.add(lblChooseADrive);
 
-
-        for (Path p : FileSystems.getDefault().getRootDirectories()) {
-            System.out.print(p);
-        }
 
         // pick a drive
         File[] backupChoiceDrive = File.listRoots();
@@ -347,7 +340,7 @@ public class GUI extends JFrame {
         customButton.setEnabled(false);
         cancelButton.setBackground(RED);
         chooseFolder.setEnabled(false);
-        setBounds(100, 100, 400, 335);
+        setBounds(300, 300, 500, 300);
         setLocationRelativeTo(null);
     }
 

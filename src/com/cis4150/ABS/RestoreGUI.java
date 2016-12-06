@@ -248,7 +248,7 @@ public class RestoreGUI extends JFrame {
         backupChoiceBox.setEnabled(false);
         cancelButton.setBackground(RED);
         chooseFolder.setEnabled(false);
-        setBounds(100, 100, 400, 335);
+        setBounds(300, 300, 500, 300);
         setLocationRelativeTo(null);
     }
 
